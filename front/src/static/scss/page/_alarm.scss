@@ -1,0 +1,190 @@
+.alarm {
+  min-height: 100vh;
+  height: auto;
+  background-color: #fff;
+  .sort_area {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    #write {
+      // height: 46px;
+      padding: 12px 26px;
+      text-align: center;
+      @include root-font-style($s: 16px, $w: 500) {
+        color: #fff;
+      }
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+  }
+  .list {
+    // margin-top: 20px;
+    .card {
+      position: relative;
+      // padding: 7px;
+      // margin-bottom:10px;
+      background: #ffffff;
+      // box-sizing: border-box;
+      // box-shadow: 0px 0px 20px rgba(167, 171, 201, 0.15);
+      // border-radius: 20px;
+
+      border-bottom: 1px solid #e3e5e5;
+
+      .content {
+        margin-bottom: 7px;
+        @include root-font-style($s: 14px, $w: 400);
+        word-break: break-all;
+      }
+      .id {
+        @include root-font-style($s: 12px, $w: 400) {
+          color: $key;
+        }
+      }
+      .space {
+        width: calc(100% + 24 * 2px);
+        height: 1px;
+        margin: 10px 0 16px -24px;
+        background-color: #e3e5e5;
+      }
+      .date {
+        display: flex;
+        flex-direction: row;
+        @include root-font-style($s: 12px, $w: 400) {
+          color: $gray;
+        }
+      }
+    }
+
+    .empty {
+      display: flex;
+      flex: 1;
+      justify-content: center;
+      align-items: center;
+      flex-grow: 1;
+      height: 70vh;
+      flex-direction: column;
+      .icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .content {
+        @include root-font-style($s: 14px, $w: 500);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: #7a7e80;
+        margin-top: 18px;
+      }
+    }
+  }
+
+  .detail {
+    // margin-bottom: 200px;
+    margin-bottom: 120px;
+    .header {
+      border-bottom: 0.5px solid #7a7e80;
+      opacity: 0.9;
+      .title {
+        @include root-font-style($s: 20px, $w: 500);
+        margin-bottom: 13px;
+      }
+      .info {
+        margin-bottom: 14px;
+        display: flex;
+        flex-direction: row;
+
+        .img_back {
+          width: 30px;
+          height: 30px;
+          border-radius: 15px;
+          background-color: #aaaaaa;
+          .img {
+            fill: $key;
+            width: 100%;
+            height: 100%;
+            margin-left: 7px;
+            margin-top: 6px;
+          }
+        }
+        .info_content {
+          margin-left: 8px;
+          .top {
+            .id {
+              @include root-font-style($s: 14px, $w: 600);
+            }
+          }
+          .bottom {
+            @include root-font-style($s: 12px, $w: 400) {
+              color: #7a7e80;
+            }
+          }
+        }
+      }
+    }
+    .content {
+      margin-top: 20px;
+      @include root-font-style($s: 14px, $w: 500) {
+        color: #000;
+      }
+    }
+    .comment_wrap {
+      margin-top: 20px;
+      border-top: 1px solid #7a7e80;
+      padding: 16px 0;
+      @include root-font-style($s: 12px, $w: 400);
+      .comment {
+        padding: 6px 0px 6px 2px;
+        border-bottom: 1px solid #aaaaaa;
+        .id {
+          color: $key;
+        }
+        .reply_content {
+          @include root-font-style($s: 14px, $w: 400);
+        }
+        .date {
+          color: #7a7e80;
+        }
+      }
+    }
+  }
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    background: #fff;
+    min-height: 120px;
+    margin-top: auto;
+    padding: 24px 20px;
+    .form {
+      .top {
+        span {
+          border: 0px;
+          textarea {
+            @include root-font-style($s: 14px, $w: 400);
+            width: 100%;
+            border: 0px;
+            border-bottom: 1px solid #7a7e80;
+            resize: none;
+          }
+        }
+      }
+      .bottom {
+        margin-top: 16px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        button {
+          width: 120px;
+          height: 30px;
+          text-align: center;
+          @include root-font-style($s: 12px, $w: 600) {
+            color: #fff;
+          }
+        }
+      }
+    }
+  }
+}

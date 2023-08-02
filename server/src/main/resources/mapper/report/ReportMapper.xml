@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.dk.sample.api.app.report.mapper.ReportDAO">
+
+<!--    <select id="selectWorkCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">-->
+<!--        <![CDATA[-->
+<!--        SELECT count(*) AS "cnt"-->
+<!--        FROM momo.work-->
+<!--        WHERE work_user_idx = #{mb_idx}-->
+<!--        ]]>-->
+<!--    </select>-->
+
+<!--    <update id="changeInsertPhoto">-->
+
+<!--        update user-->
+<!--        set user_image = #{user_image}-->
+<!--        where user_idx = #{mb_idx}-->
+
+<!--    </update>-->
+
+    <insert id="insertReport">
+        <![CDATA[
+            INSERT INTO momo.report(reporting_user_idx, reported_idx, report_category)
+            VALUES(#{mb_idx}, #{reportedIdx}, #{category})
+        ]]>
+    </insert>
+
+    <select id="getUserIdx" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT user_idx AS "reportedIdx"
+        FROM momo.user
+        WHERE 1=1
+        <if test="type.equals('nickname')">
+            AND NickName = #{name}
+        </if>
+        <if test="type.equals('name')">
+            AND user_name = #{name}
+        </if>
+    </select>
+
+
+</mapper>

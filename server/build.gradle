@@ -1,0 +1,138 @@
+plugins {
+    id 'org.springframework.boot' version '2.2.6.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'java'
+    id 'war'
+}
+
+apply plugin: 'war'
+
+bootWar {
+    archiveBaseName = 'apimain' // <--war 패키징 시 이름 설정
+    archiveFileName = 'apimain.war' //<--war 패키징 시 이름 설정
+    archiveVersion = "1.0.0"
+}
+
+group = 'kr.co.dk.sample'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+    implementation 'org.springframework.boot:spring-boot-starter-jersey'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'junit:junit:4.12'
+    runtimeOnly 'mysql:mysql-connector-java'
+//    runtimeOnly 'com.h2database:h2:1.4.199'
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    implementation(platform("org.apache.logging.log4j:log4j-bom:2.17.1"))
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testImplementation ('org.junit.jupiter:junit-jupiter-api')
+    testCompile ('org.junit.jupiter:junit-jupiter-params')
+    testRuntime ('org.junit.jupiter:junit-jupiter-engine')
+    testCompile ('org.mockito:mockito-junit-jupiter')
+
+    compile 'org.springframework.boot:spring-boot-starter-log4j2'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.10.3'
+
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.11.0'
+
+
+    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.5.1'
+
+    compile group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.4.4'
+    compile group: 'org.springdoc', name: 'springdoc-openapi-security', version: '1.4.4'
+
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+
+
+    compile 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
+
+    // json-lib
+    implementation group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
+
+    // json obj
+    implementation group: 'org.json', name: 'json', version: '20211205'
+
+    //json serialize issue
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-hibernate5', version: '2.9.9'
+    //for dummy data
+    compile group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
+
+    //thumbnailator
+    compile group: 'net.coobird', name: 'thumbnailator', version: '0.4.11'
+    implementation 'com.github.iamport:iamport-rest-client-java:0.2.10'
+    compile group: 'org.apache.poi', name: 'poi', version: '4.1.2'
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
+
+    //push
+    compile group: 'com.google.firebase', name: 'firebase-admin', version: '6.12.2'
+
+    // aws
+    compile 'org.springframework.cloud:spring-cloud-starter-aws:2.0.1.RELEASE'
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-core', version: '1.12.179'
+
+
+    // web3j
+    implementation group: 'org.web3j', name: 'core', version: '4.5.5'
+
+    // aws sns
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sns', version: '1.12.178'
+
+    // websocket - databind
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.3'
+
+}
+
+clean {
+    delete file('src/main/generated') // 인텔리제이 Annotation processor 생성물 생성위치
+}
+
+configurations {
+    all{
+        exclude group: 'org.springframework.boot', module:'spring-boot-starter-logging'
+    }
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+//log4j 보안 이슈 https://spring.io/blog/2021/12/10/log4j2-vulnerability-and-spring-boot
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        if (details.requested.group == 'org.apache.logging.log4j') {
+            details.useVersion '2.17.1'
+        }
+    }
+}
+
+ext['log4j2.version'] = '2.17.1'
+
+ext.profile = (!project.hasProperty('profile') || !profile) ? 'local' : profile
+
+sourceSets{
+    main{
+        resources {
+            srcDirs "src/main/resources/resources-${profile}"
+            exclude "resources-*"
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

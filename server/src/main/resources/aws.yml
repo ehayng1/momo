@@ -1,0 +1,27 @@
+cloud:
+  aws:
+    credentials:
+      access-key: AKIA2U5GLA257EJQ455Q
+      secret-key: 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
+    s3:
+      bucket: momobuild # 이미 사용된 버킷이라서 buildmomo와는 다름
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+
+application:
+  bucket:
+    name: momobuild # 이미 사용된 버킷이라서 buildmomo와는 다름
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2MB
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+
+server:
+  port: 8088

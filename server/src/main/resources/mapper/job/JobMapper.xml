@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.dk.sample.api.app.job.mapper.JobDAO">
+
+    <select id="selectJobCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT count(*) AS "cnt"
+        FROM momo.work
+        WHERE work_status IN (0, 2)
+        <if test='category != null and category != "" and category != "all"'>
+            AND work_location LIKE CONCAT('%', #{category}, '%')
+        </if>
+        <if test='subCategory != null and subCategory != "" and subCategory != "all"'>
+            AND work_divide_second LIKE CONCAT('%', #{subCategory}, '%')
+        </if>
+        AND work_type = #{type}
+        <!--        <if test='category != null and category != "" and category != "all" and category != "근로자"'>-->
+        <!--            AND work_divide_first LIKE CONCAT('%', #{category}, '%')-->
+        <!--        </if>-->
+        <!--        <if test='category != null and category != "" and category == "근로자"'>-->
+        <!--            AND work_type = 1-->
+        <!--        </if>-->
+        <!--        <if test='divideSecond != null and divideSecond != ""'>-->
+        <!--            AND work_divide_second LIKE CONCAT('%', #{divideSecond}, '%')-->
+        <!--        </if>-->
+    </select>
+    <select id="selectJobList" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT A.user_name as 'work_user_name',U.*, (
+                SELECT L.like_status
+                FROM momo.like_list L
+                WHERE L.like_user_idx = #{mb_idx}
+                AND L.like_type = 0
+                AND L.like_board_num = U.work_idx
+            ) AS like_status
+        from momo.user A
+        join momo.work U on (A.user_idx =U.work_user_idx)
+        WHERE work_status IN (0, 2)
+        <if test='category != null and category != "" and category != "all"'>
+            AND work_location LIKE CONCAT('%', #{category}, '%')
+        </if>
+        <if test='subCategory != null and subCategory != "" and subCategory != "all"'>
+            AND work_divide_second LIKE CONCAT('%', #{subCategory}, '%')
+        </if>
+        AND work_type = #{type}
+        <!--        <if test='category != null and category != "" and category != "all" and category != "근로자"'>-->
+        <!--            AND work_divide_first LIKE CONCAT('%', #{category}, '%')-->
+        <!--        </if>-->
+        <!--        <if test='category != null and category != "" and category == "근로자"'>-->
+        <!--            AND work_type = 1-->
+        <!--        </if>-->
+        ORDER BY work_idx DESC
+        <if test='pageNo != null and pageNo != ""'>
+            LIMIT #{start_idx}, #{page_size}
+        </if>
+    </select>
+    <select id="getWorkShare" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT A.user_name as 'work_user_name', U.*
+        from momo.user A
+                 join momo.work U on (A.user_idx = U.work_user_idx)
+        WHERE work_idx = #{workIdx}
+
+    </select>
+    <insert id="insertJobOffer">
+        INSERT INTO momo.work(site_idx, work_type, work_constructor, work_title, work_divide_first,
+                              work_divide_second, work_rest, work_status,
+                              work_location, work_period_start, work_period_end, work_user_idx,
+                              work_user_phone, work_payment, work_etc, timestamp_edit, timestamp_create,
+                              work_detailAddress)
+        VALUES (#{offerDTO.siteIdx}, 0, #{offerDTO.constructor}, #{offerDTO.siteName}, #{offerDTO.divideFirst},
+                #{offerDTO.divideSecond}, #{offerDTO.rest}, 0,
+                #{offerDTO.siteAddress}, #{offerDTO.periodStart}, #{offerDTO.periodEnd}, #{mb_idx}, #{offerDTO.phone},
+                #{offerDTO.payment}, #{offerDTO.etc}, now(), now(), #{offerDTO.detailAddress});
+    </insert>
+
+    <insert id="insertJobSearch">
+        INSERT INTO momo.work(site_idx, work_type, work_title, work_divide_first, work_divide_second, work_status,
+                              work_period_start, work_period_end, work_user_idx,
+                              work_user_phone, work_etc, timestamp_edit, timestamp_create)
+        VALUES (#{searchDTO.siteIdx}, 1, #{searchDTO.name}, #{searchDTO.divideFirst}, #{searchDTO.divideSecond}, 0,
+                #{searchDTO.periodStart}, #{searchDTO.periodEnd}, #{mb_idx}, #{searchDTO.phone}, #{searchDTO.etc},
+                now(), now());
+    </insert>
+
+    <insert id="insertWorkHistory">
+        INSERT INTO momo.work_history(work_idx, user_idx, timestamp_edit, timestamp_create)
+        VALUES (#{workIdx}, #{mb_idx}, now(), now());
+    </insert>
+
+    <update id="inertWork">
+        UPDATE momo.work
+        SET work_status = 2
+        WHERE work_idx = #{workIdx}
+    </update>
+
+    <update id="increaseWorkCount">
+        UPDATE momo.work
+        SET view_count = view_count + 1
+        WHERE work_idx = #{workIdx}
+    </update>
+
+    <select id="checkChatroom" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+            SELECT COUNT(*) as "cnt"
+            FROM momo.chatroom
+            WHERE chatroom_user_idx_1 = #{mb_idx}
+              AND chatroom_user_idx_2 = #{userIdx}
+               OR chatroom_user_idx_1 = #{userIdx}
+              AND chatroom_user_idx_2 = #{mb_idx}
+        ]]>
+    </select>
+
+    <select id="getChatroom" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+            SELECT chatroom_idx
+            FROM momo.chatroom
+            WHERE chatroom_user_idx_1 = #{mb_idx}
+              AND chatroom_user_idx_2 = #{userIdx}
+               OR chatroom_user_idx_1 = #{userIdx}
+              AND chatroom_user_idx_2 = #{mb_idx}
+        ]]>
+    </select>
+
+    <insert id="insertChatroom">
+        <![CDATA[
+            INSERT INTO momo.chatroom(chatroom_user_idx_1, chatroom_user_idx_2, chatroom_description)
+            VALUES(#{mb_idx}, #{userIdx}, NULL)
+        ]]>
+        <selectKey resultType="int" order="AFTER" keyProperty="chatroom_idx">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <select id="activeJobList" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+            SELECT *
+            FROM momo.work
+            WHERE work_user_idx = #{mb_idx}
+              AND work_status = 0
+            ORDER BY work_idx DESC
+        ]]>
+    </select>
+
+</mapper>

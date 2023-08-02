@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.dk.sample.api.app.company.mapper.CompanyDAO">
+
+    <select id="selectAllCompany" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT *
+        FROM momo.company
+        WHERE company_status = 0
+    </select>
+
+    <select id="selectCompanyInfo" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT A.*
+        FROM (SELECT @rownum := @rownum + 1 AS "rownum", B.*
+              FROM momo.company B
+              WHERE (@rownum := 0) = 0
+              ORDER BY company_total DESC, company_up DESC) A
+        WHERE A.company_idx = #{cpn_idx}
+    </select>
+
+    <select id="selectCompanySiteList" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT S.*, C.company_logo, C.company_name
+        FROM momo.site S
+                 JOIN momo.company C USING (company_idx)
+        WHERE company_idx = #{cpn_idx}
+          AND site_status = 0
+    </select>
+
+    <select id="selectCompanyEvaluate" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT (SELECT count(*) FROM momo.site_rating WHERE company_idx = #{cpn_idx}) AS "count",
+               company_safe,
+               company_welfare,
+               company_hard,
+               company_payment,
+               company_meal,
+               company_rest,
+               company_up,
+               company_down
+        FROM momo.company
+        WHERE company_idx = #{cpn_idx}
+    </select>
+
+    <select id="selectCompanyRatingList" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT site_name,
+               site_rating_comment,
+               (site_rating_safe + site_rating_welfare + site_rating_hard + site_rating_payment + site_rating_meal +
+                site_rating_rest) / 6 AS "average",
+               site_rating.timestamp_create
+        FROM momo.company
+                 JOIN momo.site USING (company_idx)
+                 JOIN momo.site_rating USING (site_idx)
+        WHERE momo.company.company_idx = #{cpn_idx}
+        ORDER BY timestamp_create DESC
+    </select>
+
+    <select id="selectSiteInfo" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT S.*, COUNT(R.site_idx) AS "count", C.company_logo
+        FROM momo.site S
+                 LEFT JOIN momo.site_rating R USING (site_idx)
+                 JOIN momo.company C ON (S.company_idx = C.company_idx)
+        GROUP BY S.site_idx
+        HAVING site_idx = #{site_idx}
+    </select>
+
+    <select id="selectSiteRatingList" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT site.site_name,
+               site_rating_comment,
+               (site_rating_safe + site_rating_welfare + site_rating_hard + site_rating_payment + site_rating_meal +
+                site_rating_rest) / 6 AS "average",
+               site_rating.timestamp_create
+        FROM momo.site_rating
+                 JOIN momo.site site USING (site_idx)
+        WHERE site_idx = #{site_idx}
+        ORDER BY site_rating_idx DESC
+    </select>
+
+    <select id="selectCompanyIdx" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT company_idx
+        FROM momo.site
+        WHERE site_idx = #{ratingDTO.site_idx}
+    </select>
+
+    <insert id="insertSiteRating">
+        INSERT INTO momo.site_rating(company_idx, site_idx, user_idx, user_divide_first, user_divide_second,
+                                     site_rating_comment,
+                                     site_rating_safe, site_rating_welfare, site_rating_hard, site_rating_payment,
+                                     site_rating_meal,
+                                     site_rating_rest, site_rating_up, site_rating_down, timestamp_edit,
+                                     timestamp_create)
+        VALUES (#{company_idx}, #{ratingDTO.site_idx}, #{mb_idx}, #{ratingDTO.user_divide_first},
+                #{ratingDTO.user_divide_second}, #{ratingDTO.site_rating_comment}, #{ratingDTO.site_rating_safe},
+                #{ratingDTO.site_rating_welfare}, #{ratingDTO.site_rating_hard}, #{ratingDTO.site_rating_payment},
+                #{ratingDTO.site_rating_meal}, #{ratingDTO.site_rating_rest}, #{ratingDTO.site_rating_up},
+                #{ratingDTO.site_rating_down}, now(), now())
+    </insert>
+
+    <update id="updateSiteRating">
+        UPDATE momo.site
+        SET site_safe      = (SELECT AVG(site_rating_safe)
+                              FROM momo.site_rating
+                              WHERE site_idx = #{ratingDTO.site_idx}),
+            site_welfare   = (SELECT AVG(site_rating_welfare)
+                              FROM momo.site_rating
+                              WHERE site_idx = #{ratingDTO.site_idx}),
+            site_hard      = (SELECT AVG(site_rating_hard)
+                              FROM momo.site_rating
+                              WHERE site_idx = #{ratingDTO.site_idx}),
+            site_payment   = (SELECT AVG(site_rating_payment)
+                              FROM momo.site_rating
+                              WHERE site_idx = #{ratingDTO.site_idx}),
+            site_meal      = (SELECT AVG(site_rating_meal)
+                              FROM momo.site_rating
+                              WHERE site_idx = #{ratingDTO.site_idx}),
+            site_rest      = (SELECT AVG(site_rating_rest)
+                              FROM momo.site_rating
+                              WHERE site_idx = #{ratingDTO.site_idx}),
+            site_total     = (SELECT AVG(site_rating_safe + site_rating_welfare + site_rating_hard +
+                                         site_rating_payment + site_rating_meal + site_rating_rest) / 6
+                              FROM momo.site_rating
+                              WHERE site_idx = #{ratingDTO.site_idx}),
+            site_up        = (SELECT SUM(site_rating_up) FROM momo.site_rating WHERE site_idx = #{ratingDTO.site_idx}),
+            site_down      = (SELECT SUM(site_rating_down)
+                              FROM momo.site_rating
+                              WHERE site_idx = #{ratingDTO.site_idx}),
+            timestamp_edit = now()
+        WHERE site_idx = #{ratingDTO.site_idx};
+    </update>
+
+    <update id="updateCompanyRating">
+        UPDATE momo.company
+        SET company_safe    = (SELECT AVG(site_safe) FROM momo.site WHERE company_idx = #{company_idx}),
+            company_welfare = (SELECT AVG(site_welfare) FROM momo.site WHERE company_idx = #{company_idx}),
+            company_hard    = (SELECT AVG(site_hard) FROM momo.site WHERE company_idx = #{company_idx}),
+            company_payment = (SELECT AVG(site_payment) FROM momo.site WHERE company_idx = #{company_idx}),
+            company_meal    = (SELECT AVG(site_meal) FROM momo.site WHERE company_idx = #{company_idx}),
+            company_rest    = (SELECT AVG(site_rest) FROM momo.site WHERE company_idx = #{company_idx}),
+            company_total   = (SELECT AVG(site_safe + site_welfare + site_hard + site_payment + site_meal + site_rest) /
+                                      6
+                               FROM momo.site
+                               WHERE company_idx = #{company_idx}),
+            company_up      = (SELECT SUM(site_up) FROM momo.site WHERE company_idx = #{company_idx}),
+            company_down    = (SELECT SUM(site_down) FROM momo.site WHERE company_idx = #{company_idx}),
+            timestamp_edit  = now()
+        WHERE company_idx = #{company_idx};
+    </update>
+
+    <select id="selectCompanyStatisticsTotal" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT A.*
+        FROM (SELECT company_name,
+                     AVG(
+                                 (company_safe +
+                                  company_welfare +
+                                  company_hard +
+                                  company_payment +
+                                  company_meal +
+                                  company_rest) / 6
+                         ) AS "total_point",
+                     company_up,
+                     company_down,
+                     company_logo,
+                     company_idx
+              FROM momo.company
+              GROUP BY company_name, company_up, company_down, company_logo, company_idx) AS A
+        ORDER BY total_point DESC, company_up ASC
+        LIMIT 10
+    </select>
+
+    <select id="selectCompanyStatisticsSafe" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT A.*
+        FROM (SELECT company_name,
+                     AVG(company_safe) AS "total_point",
+                     company_up,
+                     company_down,
+                     company_logo,
+                     company_idx
+              FROM momo.company
+              GROUP BY company_name, company_up, company_down, company_logo, company_idx) AS A
+        ORDER BY total_point DESC, company_up ASC
+        LIMIT 10
+    </select>
+
+    <select id="selectCompanyStatisticsWelfare" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT A.*
+        FROM (SELECT company_name,
+                     AVG(company_welfare) AS "total_point",
+                     company_up,
+                     company_down,
+                     company_logo,
+                     company_idx
+              FROM momo.company
+              GROUP BY company_name, company_up, company_down, company_logo, company_idx) AS A
+        ORDER BY total_point DESC, company_up ASC
+        LIMIT 10
+    </select>
+
+    <select id="selectCompanyStatisticsHard" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT A.*
+        FROM (SELECT company_name,
+                     AVG(company_hard) AS "total_point",
+                     company_up,
+                     company_down,
+                     company_logo,
+                     company_idx
+              FROM momo.company
+              GROUP BY company_name, company_up, company_down, company_logo, company_idx) AS A
+        ORDER BY total_point DESC, company_up ASC
+        LIMIT 10
+    </select>
+
+    <select id="selectCompanyStatisticsPayment" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT A.*
+        FROM (SELECT company_name,
+                     AVG(company_payment) AS "total_point",
+                     company_up,
+                     company_down,
+                     company_logo,
+                     company_idx
+              FROM momo.company
+              GROUP BY company_name, company_up, company_down, company_logo, company_idx) AS A
+        ORDER BY total_point DESC, company_up ASC
+        LIMIT 10
+    </select>
+
+    <select id="selectCompanyStatisticsMeal" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT A.*
+        FROM (SELECT company_name,
+                     AVG(company_meal) AS "total_point",
+                     company_up,
+                     company_down,
+                     company_logo,
+                     company_idx
+              FROM momo.company
+              GROUP BY company_name, company_up, company_down, company_logo, company_idx) AS A
+        ORDER BY total_point DESC, company_up ASC
+        LIMIT 10
+    </select>
+
+    <select id="selectCompanyStatisticsRest" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT A.*
+        FROM (SELECT company_name,
+                     AVG(company_rest) AS "total_point",
+                     company_up,
+                     company_down,
+                     company_logo,
+                     company_idx
+              FROM momo.company
+              GROUP BY company_name, company_up, company_down, company_logo, company_idx) AS A
+        ORDER BY total_point DESC, company_up ASC
+        LIMIT 10
+    </select>
+
+</mapper>

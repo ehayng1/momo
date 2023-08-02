@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.dk.sample.api.app.labor.mapper.LaborDAO">
+
+    <select id="selectLaborCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT count(*) cnt
+        FROM momo.labor
+        WHERE labor_status = 0
+        <if test='list != null and list != ""'>
+            AND labor_type IN
+            <foreach collection="list" item="code" index="index" separator="," open="(" close=")">
+                #{code}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getTypeList" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT *
+        FROM momo.labor_type_list
+        WHERE type_status = 0
+        ORDER BY type_idx ASC
+    </select>
+
+    <select id="selectLaborList" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT *
+        FROM momo.labor
+        WHERE labor_status = 0
+        <if test='list != null and list != ""'>
+            AND labor_type IN
+            <foreach collection="list" item="code" index="index" separator="," open="(" close=")">
+                #{code}
+            </foreach>
+        </if>
+        ORDER BY labor_idx DESC
+        <if test='pageNo != null and pageNo != ""'>
+            LIMIT #{start_idx}, #{page_size}
+        </if>
+    </select>
+    <insert id="insertLaborInfo">
+        insert into momo.labor(labor_idx, labor_name, labor_phone, labor_simple_explain, labor_description,
+                               labor_career, labor_address, labor_image, timestamp_edit, timestamp_create)
+        values (Default, #{labor_name}, #{labor_phone}, #{labor_simple_explain}, #{labor_description}, #{labor_career},
+                #{labor_address}, #{labor_image}, now(), now())
+    </insert>
+
+    <select id="selectLaborDetail" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT *
+        FROM momo.labor
+        WHERE labor_status = 0
+          AND labor_idx = #{idx}
+    </select>
+
+</mapper>

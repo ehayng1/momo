@@ -1,0 +1,61 @@
+nav.sub_tab {
+  position: relative;
+  margin-top: $mobile-padding;
+  @include root-font-style($s: 12px, $w: 700, $l: 0);
+  ul {
+    display: flex;
+    border-bottom: 1px solid #e2e2e2;
+    justify-content: space-around;
+    li {
+      position: relative;
+      //width: 100%;
+      padding: 4px 17.5px;
+      text-align: center;
+      color: #b4bbc2;
+      font-weight: 400;
+      &.active {
+        font-weight: 600;
+        font-size: 13px;
+        color: #2d3238;
+        border-bottom: 2px solid $key;
+      }
+      &:before {
+        content: '';
+        position: absolute;
+        left: 6px;
+        right: 6px;
+        top: 100%;
+        display: block;
+        width: calc(100% - 12px);
+        height: 2px;
+      }
+    }
+  }
+
+  .btn_wrap {
+    display: flex;
+    flex-direction: row;
+    // position: absolute;
+    // right: 0;
+    // bottom: 5px;
+    justify-content: flex-end;
+    margin-top: 12px;
+    button {
+      display: block;
+      width: 60px;
+      height: 40px;
+      // width: 40px;
+      // height: 25px;
+      margin-left: 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 119, 139, 0.3);
+      // @include root-font-style($s : 12px , $w : 400 , $l : 0){
+      @include root-font-style($s: 14px, $w: 600, $l: 0) {
+        // color: $key;
+        color: #fff;
+      }
+      // background-color: #FFF;
+      background-color: $key;
+    }
+  }
+}

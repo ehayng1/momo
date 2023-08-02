@@ -1,0 +1,186 @@
+:active {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+html {
+  @include root-font-style;
+}
+
+body {
+  min-width: 280px;
+
+  //TODO : test
+  padding: env(safe-area-inset-top, 20px) env(safe-area-inset-right, 20px)
+    env(safe-area-inset-bottom, 20px) env(safe-area-inset-left, 20px);
+
+  background-color: #ffffff;
+
+  $scroll-width: 5px;
+  $scroll-height: 5px;
+
+  //TODO : style 변경 필요
+  ::-webkit-scrollbar {
+    width: $scroll-width;
+    height: $scroll-height;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    //border-radius: $scroll-width / 2;
+    background-color: rgba(0, 0, 0, 0.15);
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
+
+input[type='text'],
+input[type='number'],
+input[type='tel'] {
+  @include root-font-style($s: 16px, $w: 400, $l: 0) {
+    color: #2d3238;
+  }
+  &::placeholder {
+    color: $gray;
+  }
+}
+
+input[type='number'] {
+  -webkit-appearance: textfield;
+  -moz-appearance: textfield;
+  appearance: textfield;
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+}
+
+hr {
+}
+
+em {
+  font-style: normal;
+}
+
+svg {
+  display: inline-block;
+}
+
+[hidden] {
+  display: none;
+}
+
+[contenteditable] {
+  -webkit-user-modify: read-write-plaintext-only;
+
+  &,
+  &:focus {
+    outline: none;
+  }
+}
+
+.mt0 {
+  margin-top: 0 !important;
+}
+
+.breakpoint {
+  margin-left: 5px;
+  &:before {
+    content: '';
+    display: inline-block;
+    position: relative;
+    top: -4px;
+    width: 2px;
+    height: 2px;
+    margin-right: 5px;
+    background-color: $gray;
+    border-radius: 50%;
+  }
+}
+
+.layout_container_variable {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+
+  .progressbar_wrap {
+    flex: 0 0 auto;
+  }
+  .info {
+    flex: 0 0 auto;
+  }
+  .container {
+    flex: 1 1 auto;
+    margin-top: 20px;
+  }
+  .big_btn {
+    flex: 0 0 auto;
+  }
+}
+
+.page {
+  padding: $mobile-padding;
+}
+
+section {
+  padding: 30px $mobile-padding;
+  h3 {
+    @include root-font-style($s: 22px, $w: 700, $l: 0) {
+      color: $dark-gray;
+    }
+    span {
+      display: block;
+      @include root-font-style($s: 14px, $w: 700, $l: 0) {
+        color: $gray;
+      }
+    }
+  }
+}
+
+.info {
+  .title {
+    @include root-font-style($s: 22px, $w: 700, $l: 0) {
+      color: $dark-gray;
+    }
+  }
+  .phone,
+  .occupation {
+    @include root-font-style($s: 14px, $w: 700, $l: 0) {
+      color: $gray;
+    }
+  }
+  p {
+    @include root-font-style($s: 13px, $w: normal, $l: 0) {
+      color: #868e97;
+    }
+  }
+}
+
+.addButton {
+  position: fixed;
+  bottom: 85px;
+  right: 16px;
+  width: 70px;
+  height: 70px;
+  background-color: #008ff6;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  @include root-font-style($s: 24px, $w: 700, $l: 0) {
+    color: #fff;
+  }
+}
+
+#app {
+  .main {
+    .main {
+      padding-bottom: 100px;
+    }
+  }
+}

@@ -1,0 +1,26 @@
+header {
+  padding: 7px 5px;
+  margin: 10px;
+  .header_inner {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .logo {
+    width: 105px;
+    height: 26px;
+  }
+  .header_nav {
+    display: flex;
+
+    .header_search {
+      width: 24px;
+      height: 24px;
+      margin-right: 14px;
+    }
+    .members {
+      display: flex;
+      flex-direction: row;
+    }
+  }
+}

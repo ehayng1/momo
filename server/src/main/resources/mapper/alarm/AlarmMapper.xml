@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.dk.sample.api.app.alarm.mapper.AlarmDAO">
+
+    <select id="selectAlarmList" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT *
+        FROM momo.push
+        WHERE push_user_idx = #{mb_idx}
+        ORDER BY push_idx DESC;
+    </select>
+
+    <select id="getFcmList" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT token_fcm, user_idx
+        FROM momo.user
+        WHERE push_yn = 'Y'
+        AND token_fcm IS NOT NULL
+        AND token_fcm != ''
+        AND user_idx IN
+        <foreach collection="list" item="code" index="index" separator="," open="(" close=")">
+            #{code}
+        </foreach>
+    </select>
+
+    <insert id="insertPush">
+        INSERT INTO momo.push(push_title, push_content, push_user_idx, timestamp_edit, timestamp_create)
+        VALUES
+        <foreach collection="idxList" item="item" separator=" , ">
+            (#{title}, #{content}, #{item.user_idx}, now(), now())
+        </foreach>
+    </insert>
+
+</mapper>

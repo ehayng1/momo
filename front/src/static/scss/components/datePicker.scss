@@ -1,0 +1,62 @@
+.vue-daterange-picker {
+  min-width: 100% !important;
+}
+.calendars {
+  width: 100%;
+}
+.calendars-container {
+  width: 100%;
+}
+.drp-calendar.col.left.single {
+  min-width: 100%;
+  padding: 0;
+}
+.reportrange-text {
+  display: none !important;
+}
+
+.daterangepicker .calendar-table tbody th {
+  // background-color: #008ff6;
+  border-radius: 0;
+  // color: #fff;
+  font-weight: normal;
+}
+
+.daterangepicker .calendar-table td,
+.daterangepicker .calendar-table th {
+  border-radius: 0;
+}
+.daterangepicker td.active,
+.daterangepicker td.active:hover {
+  background-color: #008ff6;
+  border-radius: 15px;
+}
+.daterangepicker.td.in-range {
+  background-color: #cadee4;
+  color: #008ff6;
+}
+
+.daterangepicker td.weekend:not(.off),
+.daterangepicker th.weekend:not(.off) {
+  color: red;
+}
+
+.daterangepicker option.disabled,
+.daterangepicker td.disabled {
+  color: #999 !important;
+}
+.slot {
+  // background-color: #008ff6;
+  font-size: 1.5rem;
+  padding: 1.5rem;
+  color: #008ff6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  /*justify-content: space-between;*/
+}
+
+.text-black {
+  color: #000;
+}

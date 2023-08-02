@@ -1,0 +1,14 @@
+@mixin root-font-style($s: 10px, $w: 400, $l: -0.33px) {
+  font: {
+    // family: 'Pretndard';
+    family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+      system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo',
+      'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji',
+      'Segoe UI Symbol', sans-serif;
+    size: $s;
+    weight: $w;
+  }
+  letter-spacing: $l;
+  line-height: 1.35;
+  @content;
+}

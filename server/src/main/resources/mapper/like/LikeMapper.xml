@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.dk.sample.api.app.like.mapper.LikeDAO">
+
+    <insert id="addLike">
+        insert into momo.like_list(like_type, like_board_num, like_user_idx, like_status)
+        values (#{type}, #{boardNum}, #{mb_idx}, 0)
+    </insert>
+
+
+    <update id="toggleLike">
+        UPDATE momo.like_list
+           SET like_status = IF (like_status = 0, 1, 0)
+         WHERE like_user_idx = #{mb_idx}
+           AND like_board_num = #{boardNum}
+           AND like_type = #{type}
+    </update>
+
+
+</mapper>

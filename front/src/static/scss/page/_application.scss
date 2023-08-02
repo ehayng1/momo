@@ -1,0 +1,130 @@
+.applicaion {
+  .list {
+    margin-top: $mobile-padding;
+    .card {
+      overflow: hidden;
+      // display: flex;
+      // flex-direction: row;
+      position: relative;
+      // padding: 10px 12px;
+      // margin-bottom: 2rem;
+      background: #ffffff;
+      box-sizing: border-box;
+      // box-shadow: 0px 0px 20px rgba(167, 171, 201, 0.15);
+      // border-radius: 10px;
+      &.back {
+        background: #dddddd;
+      }
+      .image {
+        //width: 106px;
+        flex-basis: 106px;
+        flex-grow: 0;
+        flex-shrink: 0;
+        margin: -10px 0 -10px -12px;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+      }
+
+      dl {
+        // margin-left: 14px;
+        width: 100%;
+        margin-right: 6px;
+      }
+      .input_box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-left: 2px;
+      }
+      .title {
+        img {
+          width: auto;
+          height: 23px;
+        }
+        p {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          @include text-card-title;
+        }
+      }
+      .title2 {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        span {
+          @include text-card-title;
+        }
+        .name {
+        }
+        .year {
+          color: #00778b;
+        }
+      }
+      .phone {
+        margin-top: 7px;
+        @include text-card-desc;
+      }
+      .address {
+        margin-top: 3px;
+        @include text-card-desc;
+      }
+
+      .date {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin-top: 5px;
+        @include root-font-style($s: 12px, $w: 400);
+        color: $dark-gray;
+        span {
+          @extend .breakpoint;
+          &.amount {
+            color: $gray;
+          }
+          &.career {
+            color: $key;
+          }
+        }
+      }
+      .upload_btn {
+        // position: absolute;
+        right: 15px;
+        top: 17px;
+        padding: 15px;
+        // border: 2px solid $key;
+        border-radius: 8px;
+        // background-color: $key;
+        span {
+          @include root-font-style($s: 16px, $w: 600);
+          color: #fff;
+        }
+      }
+    }
+    .empty {
+      display: flex;
+      flex: 1;
+      justify-content: center;
+      align-items: center;
+      flex-grow: 1;
+      height: 70vh;
+      .icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .content {
+        @include root-font-style($s: 14px, $w: 500);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: #7a7e80;
+        margin-top: 18px;
+      }
+    }
+  }
+}

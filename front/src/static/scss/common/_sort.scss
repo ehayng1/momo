@@ -1,0 +1,38 @@
+.sort_area {
+  // padding: 0px 5px;
+  display: flex;
+  // justify-content: space-between;
+  .sort_choice {
+    display: flex;
+    align-items: center;
+  }
+  .sort_box {
+    button:not(:last-child) {
+      margin-bottom: 3px;
+    }
+    button {
+      display: block;
+      @include root-font-style($s: 14px, $w: 700, $l: 0);
+      &:before {
+        content: '';
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 7px;
+        border-radius: 50%;
+      }
+      &.type1 {
+        color: $key;
+        &:before {
+          background-color: $key;
+        }
+      }
+      &.type2 {
+        color: $point;
+        &:before {
+          background-color: $point;
+        }
+      }
+    }
+  }
+}

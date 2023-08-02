@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.dk.sample.api.app.board.mapper.BoardDAO">
+
+    <select id="selectBoardCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT count(*) AS "cnt"
+        FROM momo.board_issue
+        WHERE issue_status = 0
+    </select>
+
+    <select id="selectBoardByBest" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT issue.*, reply.reply_count, U.code_blockchain, U.NickName AS "nickname", U.avatar
+        FROM momo.board_issue issue
+                 LEFT JOIN (SELECT COUNT(*) AS 'reply_count', issue_idx
+                            FROM momo.board_issue_reply
+                            WHERE reply_status = 0
+                            GROUP BY issue_idx) reply USING (issue_idx)
+                 JOIN momo.user U ON (issue_user_idx = user_idx)
+        WHERE issue_status = 0
+        GROUP BY issue.issue_idx
+        ORDER BY view_count DESC
+        LIMIT 10
+    </select>
+
+    <select id="selectBoardByNew" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT issue.*, reply.reply_count, U.code_blockchain, U.NickName AS "nickname", U.avatar
+        FROM momo.board_issue issue
+        LEFT JOIN (
+        SELECT COUNT(*) AS 'reply_count', issue_idx
+        FROM momo.board_issue_reply
+        WHERE reply_status = 0
+        GROUP BY issue_idx
+        ) reply USING (issue_idx)
+        JOIN momo.user U ON (issue_user_idx = user_idx)
+        WHERE issue_status = 0
+        GROUP BY issue.issue_idx
+        ORDER BY issue_idx DESC
+        <if test='pageNo != null and pageNo != ""'>
+            LIMIT #{start_idx}, #{page_size}
+        </if>
+    </select>
+
+    <select id="selectBoardByReply" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT issue.*, reply.reply_count, U.code_blockchain, U.NickName AS "nickname", U.avatar
+        FROM momo.board_issue issue
+        LEFT JOIN (
+        SELECT COUNT(*) AS 'reply_count', issue_idx
+        FROM momo.board_issue_reply
+        WHERE reply_status = 0
+        GROUP BY issue_idx
+        ) reply USING (issue_idx)
+        JOIN momo.user U ON (issue_user_idx = user_idx)
+        WHERE issue_status = 0
+        GROUP BY issue.issue_idx
+        ORDER BY reply_count DESC
+        <if test='pageNo != null and pageNo != ""'>
+            LIMIT #{start_idx}, #{page_size}
+        </if>
+    </select>
+
+    <select id="selectBoardByView" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT issue.*, reply.reply_count, U.code_blockchain, U.NickName AS "nickname", U.avatar
+        FROM momo.board_issue issue
+        LEFT JOIN (
+        SELECT COUNT(*) AS 'reply_count', issue_idx
+        FROM momo.board_issue_reply
+        WHERE reply_status = 0
+        GROUP BY issue_idx
+        ) reply USING (issue_idx)
+        JOIN momo.user U ON (issue_user_idx = user_idx)
+        WHERE issue_status = 0
+        GROUP BY issue.issue_idx
+        ORDER BY view_count DESC
+        <if test='pageNo != null and pageNo != ""'>
+            LIMIT #{start_idx}, #{page_size}
+        </if>
+    </select>
+
+    <update id="updateBoard">
+        UPDATE momo.board_issue
+        SET issue_status = 1
+        WHERE issue_idx = #{issue_idx}
+          AND issue_user_idx = #{mb_idx}
+    </update>
+
+    <update id="increaseViewCount">
+        UPDATE momo.board_issue
+        SET view_count = view_count + 1
+        WHERE issue_idx = #{issue_idx}
+          AND issue_status = 0
+    </update>
+
+    <select id="selectBoardDetail" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT B.*, U.code_blockchain, U.NickName AS "nickname", U.avatar, U.user_image
+        FROM momo.board_issue B
+                 JOIN momo.user U ON (user_idx = issue_user_idx)
+        WHERE issue_idx = #{issue_idx}
+          AND issue_status = 0
+    </select>
+
+    <select id="selectBoardFiles" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT F.*
+          FROM momo.files F
+         WHERE file_post_idx = #{issue_idx}
+           AND file_post_type = 0
+    </select>
+
+    <select id="selectReply" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT R.*, U.code_blockchain, U.nickname
+          FROM momo.board_issue_reply R
+          JOIN momo.user U ON (user_idx = reply_user_idx)
+         WHERE issue_idx = #{issue_idx}
+           AND reply_status = 0
+    </select>
+
+    <insert id="insertBoard" useGeneratedKeys="true" keyColumn="issue_idx">
+        INSERT INTO momo.board_issue(issue_idx, issue_user_idx, issue_title, issue_content, issue_image,
+                                     issue_additional, view_count, issue_status, check_image, check_video,
+                                     timestamp_edit, timestamp_create)
+        VALUES (DEFAULT, #{mb_idx}, #{issue_title}, #{issue_content}, '', #{issue_additional}, DEFAULT, 0,
+                #{checkImage}, #{checkVideo}, now(), now())
+        <selectKey resultType="int" order="AFTER" keyProperty="issue_idx">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <insert id="insertFilePaths">
+        INSERT INTO momo.files(file_post_type, file_post_idx, file_type, file_path) VALUES
+        <foreach collection="fileList" item="item" separator=" , ">
+            (#{postType}, #{boardIdx}, #{item.fileType}, #{item.path})
+        </foreach>
+    </insert>
+
+    <insert id="insertReply">
+        INSERT INTO momo.board_issue_reply
+        VALUES (DEFAULT, #{issue_idx}, #{mb_idx}, #{reply_content}, 0, now(), now())
+    </insert>
+
+    <update id="deleteReply">
+        UPDATE momo.board_issue_reply
+           SET reply_status = 1, timestamp_edit = now()
+         WHERE reply_idx = #{reply_idx}
+           AND reply_user_idx = #{mb_idx}
+           AND issue_idx = #{issue_idx}
+    </update>
+
+    <update id="updateReply">
+        <![CDATA[
+            UPDATE momo.board_issue_reply
+               SET reply_content = #{content}, timestamp_edit = now()
+             WHERE reply_idx = #{idx}
+        ]]>
+    </update>
+
+</mapper>

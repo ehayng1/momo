@@ -1,0 +1,49 @@
+.share {
+  padding: 10px;
+  //   max-width: 60%;
+  //   height: 60vh;
+  display: flex;
+  flex-direction: column;
+  // justify-content: center;
+
+  div {
+    display: flex;
+    align-items: center;
+    // padding: 20px 0px;
+    span {
+      margin-right: 10px;
+      color: #000;
+      font-weight: 700;
+      font-size: 24px;
+    }
+    p {
+      @include root-font-style($s: 16px, $w: 700, $l: 0) {
+        color: $gray;
+      }
+    }
+  }
+  button {
+    // padding-top: 15px;
+    margin-top: 10px;
+    background: #00778b;
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 16px;
+  }
+  .share_info {
+    display: flex;
+    flex-direction: row;
+  }
+  .share_info_address {
+    display: flex;
+    flex-direction: row;
+    p {
+      cursor: pointer;
+      &:hover {
+        // color: red;
+        opacity: 0.5;
+      }
+    }
+  }
+}

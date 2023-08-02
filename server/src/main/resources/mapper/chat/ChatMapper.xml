@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.dk.sample.api.app.chat.mapper.ChatDAO">
+
+    <select id="getJoinedRoomList" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT A.chatroom_idx,
+        CASE
+        WHEN A.chatroom_user_idx_1 = #{mb_idx}
+        THEN NULL
+        ELSE A.chatroom_user_idx_1
+        END AS "user_idx_1",
+        CASE
+        WHEN A.chatroom_user_idx_2 = #{mb_idx}
+        THEN NULL
+        ELSE A.chatroom_user_idx_2
+        END AS "user_idx_2",
+        C.user_name AS "name_1", D.user_name AS "name_2", MAX(B.timestamp_create) AS "timestamp_create", B.content
+        FROM momo.chatroom A
+
+        JOIN momo.chat B USING (chatroom_idx)
+        JOIN momo.user C ON (A.chatroom_user_idx_1 = C.user_idx)
+        JOIN momo.user D ON (A.chatroom_user_idx_2 = D.user_idx)
+        GROUP BY A.chatroom_idx
+        HAVING user_idx_1 IS NULL
+        OR user_idx_2 IS NULL
+        ORDER BY timestamp_create DESC
+        <!--        SELECT A.chatroom_idx,-->
+        <!--        A.chatroom_user_idx_1 ,-->
+        <!--        A.chatroom_user_idx_2 ,-->
+        <!--        C.user_name AS "name_1", D.user_name AS "name_2", MAX(B.timestamp_create) AS "timestamp_create", B.content-->
+        <!--        FROM momo.chatroom A-->
+        <!--        JOIN momo.chat B USING (chatroom_idx)-->
+        <!--        JOIN momo.user C ON (A.chatroom_user_idx_1 = C.user_idx)-->
+        <!--        JOIN momo.user D ON (A.chatroom_user_idx_2 = D.user_idx)-->
+        <!--        GROUP BY A.chatroom_idx-->
+        <!--        ORDER BY timestamp_create DESC-->
+    </select>
+
+    <select id="getRecvUserInfo" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT *
+        FROM momo.chatroom
+        WHERE chatroom_idx = #{idx}
+    </select>
+
+    <select id="selectRoomBeforeInsert" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap"
+    >
+        SELECT chatroom_idx
+        FROM momo.chatroom
+        WHERE chatroom_user_idx_1 IN (#{mb_idx}, #{userIdx})
+          AND chatroom_user_idx_2 IN (#{mb_idx}, #{userIdx})
+    </select>
+
+    <insert id="insertRoom" useGeneratedKeys="true" keyColumn="chatroom_idx">
+        INSERT INTO momo.chatroom(chatroom_user_idx_1, chatroom_user_idx_2)
+        VALUES (#{mb_idx}, #{userIdx})
+        <selectKey resultType="int" order="BEFORE" keyProperty="chatroom_idx">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <select id="selectRoomIdMessage" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT A.chat_idx, A.name AS "writer", A.content AS "message", A.timestamp_create AS "date"
+        FROM (
+                 SELECT C.chat_idx, U.user_name AS "name", C.content, C.timestamp_create
+                 FROM momo.chat C
+                          JOIN momo.user U ON (C.send_user_idx = U.user_idx)
+                 WHERE chatroom_idx = #{chatRoom_idx}
+                 ORDER BY chat_idx DESC
+                     LIMIT 0, 100) A
+        ORDER BY chat_idx ASC
+    </select>
+    <insert id="insertMessageInChat" useGeneratedKeys="true" keyColumn="chatroom_idx">
+        INSERT INTO chat(chat_idx, chatroom_idx, send_user_idx, recv_user_idx, content, timestamp_edit,
+                         timestamp_create)
+        VALUES (default, #{chatroom_idx}, #{send_user_idx}, #{recv_user_idx}, #{content}, now(), now())
+    </insert>
+
+    <insert id="insertMessage" useGeneratedKeys="true" keyColumn="chatroom_idx">
+        INSERT INTO chat(chat_idx, chatroom_idx, send_user_idx, recv_user_idx, content, timestamp_edit,
+                         timestamp_create)
+        VALUES (default, #{roomId}, #{sendUserIdx}, #{recvUserIdx}, #{message}, now(), now())
+    </insert>
+
+    <!--    //채팅메세지  ㅇㅏ직 사용하지않음 -->
+    <select id="reciveMessageReturn" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT user_name, content
+        FROM user,
+             chat
+        where token_access = #{username}
+
+
+    </select>
+    <select id="selectUserInfo" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        select code_blockchain, user_idx, NickName as "nickname"
+        from user
+        where user_idx = #{userIdx}
+
+    </select>
+
+    <select id="rooms" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT *
+        FROM momo.chatroom
+        WHERE chatroom_user_idx_1 IS NULL
+          AND chatroom_user_idx_2 IS NULL
+          AND chatroom_description IS NOT NULL
+        ORDER BY chatroom_idx ASC
+    </select>
+</mapper>

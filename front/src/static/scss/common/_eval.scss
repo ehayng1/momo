@@ -1,0 +1,119 @@
+.work_history{
+  .list{
+    margin-top: $mobile-padding;
+    .card{
+      display: flex;
+      flex-direction: row;
+      position: relative;
+      padding: 10px 12px;
+      margin-bottom:10px;
+      background: #FFFFFF;
+      box-sizing: border-box;
+      box-shadow: 0px 0px 20px rgba(167, 171, 201, 0.15);
+      border-radius: 10px;
+      dl{
+        width: 100%;
+      }
+
+      .wrap{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .title{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        @include root-font-style($s : 16px , $w : 700 , $l : 0){
+          color: $gray;
+        };
+        &:before{
+          content: "";
+          display: block;
+          width: 14px;
+          height: 14px;
+          margin-right: 5px;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-image: url($url-images +'common/building.png');
+        }
+      }
+      .desc{
+        // height: 36px;
+        margin-top: 3px;
+        @include root-font-style($s : 14px , $w : 400){
+          color: $dark-gray;
+        };
+
+      }
+
+      .date{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        @include root-font-style($s : 14px , $w : 400){
+          color: $dark-gray;
+        };
+
+        &:before{
+          content: "";
+          display: block;
+          width: 14px;
+          height: 14px;
+          margin-right: 5px;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-image: url($url-images +'common/clock.png');
+        }
+      }
+      .average{
+        @extend .breakpoint;
+      }
+
+      .star_wrap{
+        display: flex;
+        flex-direction: row;
+        // position: absolute;
+        // top: 10px;
+        // right: 12px;
+        svg{
+          display: block;
+        }
+      }
+    }
+  }
+}
+
+.detail_eval{
+  .info{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    span {
+      display: inline;
+      @include root-font-style($s : 16px , $w : 400);
+      &:not(:last-child){
+        margin-right : 10px;
+      }
+      svg{
+        //font-size: 16px;
+        margin : -5px 3px 0;
+      }
+    }
+
+    h3{
+      span {
+        color: $gray;
+      }
+    }
+
+    .opinion{
+
+
+    }
+  }
+}
+

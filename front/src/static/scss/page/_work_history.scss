@@ -1,0 +1,101 @@
+.work_history {
+  .button_area {
+    // padding: 0px 5px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 27px;
+    border-bottom: 1px solid #eef1f5;
+    a {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      button {
+        // width: 100%;
+        // padding: 7px 10px;
+        // width: 122px;
+        padding: 7px 10px;
+        background-color: transparent;
+        color: #2d3238;
+        border-radius: 0px;
+        border-bottom: 3px solid $key;
+        font-size: 20px;
+        font-weight: bold;
+      }
+    }
+    .unactive {
+      button {
+        // background-color: #9f988d;
+        color: #b4bbc2;
+        border-bottom: none;
+        font-weight: normal;
+        font-size: 14px;
+        padding: 10px;
+      }
+    }
+  }
+  .title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    @include root-font-style($s: 14px, $w: 400, $l: 0) {
+      color: #2d3238;
+    }
+    &.type2 {
+      color: #dddddd;
+    }
+    // &:before {
+    //   content: '';
+    //   display: block;
+    //   width: 14px;
+    //   height: 14px;
+    //   margin-right: 5px;
+    //   background-repeat: no-repeat;
+    //   background-position: center;
+    //   // background-image: url($url-images + 'common/building.png');
+    // }
+    .occupation {
+      margin-left: 4px;
+      padding: 2px 7px;
+      background-color: #e8f5ff;
+      border: 1px solid #e8f5ff;
+      border-radius: 12px;
+      @include root-font-style($s: 13px, $w: 600, $l: 0) {
+        color: $key;
+      }
+      &.type2 {
+        color: #dddddd;
+        border: 1px solid #dddddd;
+      }
+    }
+  }
+  .date {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 13px;
+    font-weight: lighter;
+    color: #868e97;
+    // @include root-font-style($s: 16px, $w: 400) {
+    //   color: $dark-gray;
+    // }
+    &.type2 {
+      color: #dddddd;
+    }
+
+    // &:before {
+    //   content: '';
+    //   display: block;
+    //   width: 14px;
+    //   height: 14px;
+    //   margin-right: 5px;
+    //   background-repeat: no-repeat;
+    //   background-position: center;
+    //   // background-image: url($url-images + 'common/clock.png');
+    // }
+  }
+}

@@ -1,0 +1,251 @@
+.mypage {
+  .info {
+    .wallet {
+      .btn_class {
+        justify-content: center;
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        width: 100%;
+        input {
+          // padding-left: 40px;
+          // border-radius: 10px;
+          height: 100%;
+          width: 100%;
+          // padding-left: 40px;
+          border-radius: 10px 0px 0px 10px;
+          // padding-right: 40%;
+          padding: 10px 10px;
+          background-color: #fff;
+          color: #000;
+          input::placeholder {
+          }
+
+          // height: inherit;
+        }
+        .confirm {
+          display: flex;
+          align-items: center;
+          // top: 30%;
+          white-space: nowrap;
+          // margin-left: 100px;
+          // right: 10%;
+          width: 10%;
+          right: 6%;
+          top: 1%;
+          border-radius: 10px solid #bbb;
+          // width: 100%;
+          height: 100%;
+        }
+        button {
+          width: 50%;
+          height: 100%;
+          // left: 19%;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          right: 3%;
+          font-size: 14px;
+          // padding-right: 10px;
+          // height: inherit;
+          color: #fff;
+          background-color: #00778b;
+          border-radius: 0px 10px 10px 0px;
+          padding: 5px 10px;
+
+          // padding: 3px;
+          border: none;
+          outline: none;
+          cursor: pointer;
+        }
+      }
+      width: 100%;
+      input {
+        border-radius: 0px;
+        font-size: 17px;
+        // font-size: 1.4em;
+        width: 100%;
+        padding: 10px 0px;
+        border-radius: 10px;
+
+        text-align: center;
+        color: #fff;
+        background-color: #00778b;
+        // width: 100%;
+        // margin-top: 10px;
+        outline: none;
+      }
+      .rightblock {
+        display: flex;
+        flex-direction: column;
+        // background-color: red;
+      }
+      .card {
+        display: flex;
+        flex-direction: row;
+        // background-color: #fff;
+        box-shadow: 0px 0px 20px rgba(167, 171, 201, 0.15);
+        border-radius: 20px;
+        // align-items: center;
+
+        padding: 52px 32px;
+
+        .card_nickname {
+          margin-right: 30px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          .imageButton {
+            color: #fff;
+            border-radius: 10px;
+            width: 90px;
+            font-size: 14px;
+            height: 40px;
+            background-color: #00778b;
+          }
+
+          .preview {
+            // background-color: red;
+
+            // input {
+            //   width: 100%;
+            //   padding: 10px 0px;
+
+            //   text-align: center;
+            //   color: #fff;
+            //   background-color: #00778b;
+            //   // width: 100%;
+            //   // margin-top: 10px;
+            //   outline: none;
+            // }
+            position: relative;
+            img {
+              object-fit: cover;
+              border-radius: 50%;
+              margin-bottom: 10px;
+            }
+            button {
+              padding: 0;
+              margin: 0;
+
+              // background-color: #00778b;
+              top: 50%;
+              left: 50%;
+              transform: translate(-55%, -50%);
+              position: absolute;
+            }
+          }
+        }
+      }
+
+      margin-top: 12px;
+      .icon {
+        margin-top: 10px;
+      }
+      .num {
+        @include root-font-style($s: 14px, $w: 400) {
+          text-align: center;
+          vertical-align: middle;
+          color: #00778b;
+          line-break: anywhere;
+        }
+        margin-left: 5px;
+      }
+    }
+  }
+
+  nav {
+    &.work {
+      margin-top: 42px;
+    }
+    &.terms {
+      margin-top: 48px;
+    }
+    li {
+      margin-bottom: $mobile-padding;
+
+      &.bag a:before {
+        background-image: url($url-images + 'mypage/bag.png');
+      }
+      &.checked a:before {
+        background-image: url($url-images + 'mypage/checked.png');
+      }
+      &.service a:before {
+        background-image: url($url-images + 'mypage/service.png');
+      }
+      &.document a:before {
+        background-image: url($url-images + 'mypage/document.png');
+      }
+      &.lock a:before {
+        background-image: url($url-images + 'mypage/lock.png');
+      }
+      &.openchat a:before {
+        background-image: url($url-images + 'mypage/openchat.png');
+      }
+      &.heart a:before {
+        // background-image: url($url-images + 'mypage/heart.png');
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      a {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        // justify-content: space-between; // width: 50%;
+        @include text-card-title;
+        &:before {
+          content: '';
+          display: block;
+          width: 20px;
+          height: 20px;
+          margin-right: 8px;
+          background-repeat: no-repeat;
+          background-position: center;
+        }
+
+        color: #555555;
+        font-weight: 400;
+      }
+    }
+  }
+
+  .logout_btn {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 2rem;
+    @include text-card-title;
+    &:before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-image: url($url-images + 'mypage/logout.png');
+    }
+    color: #555555;
+  }
+  .deleteAccount_btn {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 2rem;
+    @include text-card-title;
+    &:before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-image: url($url-images + 'mypage/deleteAccount.png');
+    }
+    color: #555555;
+  }
+}

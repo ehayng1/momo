@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.dk.sample.api.app.mypage.mapper.MypageDAO">
+
+    <select id="selectWorkCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT count(*) AS "cnt"
+        FROM momo.work
+        WHERE work_user_idx = #{mb_idx}
+        ]]>
+    </select>
+
+    <update id="changeInsertPhoto">
+
+        update user
+        set user_image = #{user_image}
+        where user_idx = #{mb_idx}
+
+    </update>
+
+    <select id="selectEquipCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT SUM(a.cnt) AS "cnt"
+        FROM (
+                 SELECT count(*) AS "cnt"
+                 FROM momo.construction_equipment
+                 WHERE construction_user_idx = #{mb_idx}
+
+                 UNION
+
+                 SELECT count(*) AS "cnt"
+                 FROM momo.equipment_history
+                 WHERE user_idx = #{mb_idx}
+             ) a
+        ]]>
+    </select>
+
+    <select id="selectWorkHistoryCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT SUM(a.cnt) AS "cnt"
+        FROM (
+                 SELECT count(*) AS "cnt"
+                 FROM momo.work W
+                 WHERE work_user_idx = #{mb_idx}
+                   AND work_type = #{type}
+
+                 UNION
+
+                 SELECT count(*) AS "cnt"
+                 FROM momo.work_history
+                 JOIN momo.work USING (work_idx)
+                 WHERE user_idx = #{mb_idx}
+                   AND work_type = #{type}
+                   AND work_history_status != 3
+             ) AS a
+        ]]>
+    </select>
+
+    <select id="selectEquipLikeCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        select count(*) as "cnt"
+          from momo.like_list L
+          join momo.construction_equipment E on (L.like_board_num = E.construction_idx)
+         where E.construction_status = 0
+           and L.like_type = 1
+           and L.like_status = 0
+           and L.like_user_idx = #{mb_idx}
+        ]]>
+    </select>
+
+    <select id="selectWorkLikeCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        select count(*) as "cnt"
+          from momo.like_list L
+                 join momo.work W on (L.like_board_num = W.work_idx)
+         where W.work_status = 0
+           and L.like_type = #{type}
+           and L.like_status = 0
+           and L.like_user_idx = #{mb_idx}
+        ]]>
+    </select>
+
+    <select id="getInfo" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT b.*, b.NickName AS "nickname"
+        FROM momo.user b
+                 LEFT JOIN momo.blockchain_info a ON (blockchain_user_idx = user_idx)
+        WHERE b.user_idx = #{mb_idx}
+        ]]>
+    </select>
+
+    <select id="workHistory" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT site_name,
+               site_rating_comment,
+               (site_rating_safe + site_rating_welfare + site_rating_hard + site_rating_payment + site_rating_meal + site_rating_rest) / 6 AS "average",
+               site_rating.timestamp_create
+        FROM momo.site_rating
+        JOIN momo.site USING (site_idx)
+        WHERE user_idx = #{mb_idx}
+        ORDER BY site_rating_idx DESC
+        ]]>
+        <if test='pageNo != null and pageNo != ""'>
+            LIMIT #{start_idx}, #{page_size}
+        </if>
+    </select>
+
+    <select id="myRequestEquip" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT *, 0 AS "own"
+        FROM momo.construction_equipment
+        WHERE construction_user_idx = #{mb_idx}
+
+        UNION
+
+        SELECT E.*, 1 AS "own"
+        FROM momo.equipment_history EH
+                 JOIN momo.construction_equipment E USING (construction_idx)
+        WHERE EH.user_idx = #{mb_idx}
+        ORDER BY construction_idx DESC
+        ]]>
+    </select>
+
+    <select id="myRequestWork" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT W.*, 0 AS "own"
+        FROM momo.work W
+        WHERE work_type = #{type}
+          AND work_user_idx = #{mb_idx}
+
+        UNION
+
+        SELECT W.*, 1 AS "own"
+        FROM momo.work_history WH
+        JOIN momo.work W USING (work_idx)
+        WHERE W.work_type = #{type}
+          AND user_idx = #{mb_idx}
+          AND WH.work_history_status != 3
+        ORDER BY work_idx DESC
+        ]]>
+    </select>
+<!--        SELECT W.*-->
+<!--          FROM momo.work W-->
+<!--         WHERE work_type = #{type}-->
+<!--           AND work_user_idx = #{mb_idx}-->
+<!--         ORDER BY work_idx DESC-->
+<!--         SELECT work_history_idx,-->
+<!--                user_idx,-->
+<!--                company_logo,-->
+<!--                work_title,-->
+<!--                work_user_phone,-->
+<!--                work_period_start,-->
+<!--                work_period_end,-->
+<!--                work_history_status,-->
+<!--                work_idx,-->
+<!--                    company_total-->
+<!--         FROM momo.work_history-->
+<!--                  LEFT JOIN momo.work USING (work_idx)-->
+<!--                  LEFT JOIN momo.company ON (work_constructor = company_name)-->
+<!--         WHERE work_type = #{type}-->
+<!--           AND user_idx = #{mb_idx}-->
+<!--           AND work_history_status != 3-->
+<!--         ORDER BY work_history_idx DESC-->
+
+    <select id="getFiles" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT *
+        FROM momo.files
+        WHERE file_post_type = 1
+          AND file_post_idx = #{idx}
+        ORDER BY file_idx ASC
+        ]]>
+    </select>
+
+    <select id="likeEquipHistory" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        select E.*, L.like_status
+        from momo.like_list L
+                 join momo.construction_equipment E on (L.like_board_num = E.construction_idx)
+        where E.construction_status = 0
+          and L.like_type = 1
+          and L.like_status = 0
+          and L.like_user_idx = #{mb_idx}
+        order by E.construction_idx desc
+        ]]>
+    </select>
+
+    <select id="likeWorkHistory" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT A.user_name as 'work_user_name', W.*, L.like_status
+          FROM momo.work W
+          JOIN momo.like_list L on (L.like_board_num = W.work_idx)
+          JOIN momo.user A on (W.work_user_idx = A.user_idx)
+         WHERE W.work_type = #{type}
+           AND L.like_type = 0
+           AND L.like_user_idx = #{mb_idx}
+           AND L.like_status = 0
+        ORDER BY work_idx DESC
+        ]]>
+    </select>
+
+    <update id="myRequestUpdateEquip">
+        <![CDATA[
+        UPDATE momo.construction_equipment
+        SET construction_status = #{action}
+        WHERE construction_user_idx = #{mb_idx}
+          AND construction_idx = #{idx}
+        ]]>
+    </update>
+
+    <update id="myRequestUpdateWork">
+        <![CDATA[
+            UPDATE momo.work
+               SET work_status = #{action}
+             WHERE work_idx = #{idx}
+               AND work_user_idx = #{mb_idx}
+        ]]>
+    </update>
+<!--        UPDATE momo.work_history-->
+<!--        SET work_history_status = #{action}-->
+<!--        WHERE user_idx = #{mb_idx}-->
+<!--          AND work_history_idx = #{idx}-->
+
+    <select id="selectIssueCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT count(*) AS "cnt"
+        FROM momo.board_issue
+        WHERE issue_user_idx = #{mb_idx}
+        ]]>
+    </select>
+
+    <select id="selectAcceptanceCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT count(*) AS "cnt"
+        FROM momo.work_history
+        WHERE user_idx = #{mb_idx}
+          AND work_acceptance = 0
+        ]]>
+    </select>
+
+    <select id="issueHistory" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT issue.*, reply.reply_count, U.code_blockchain, U.NickName AS "nickname", U.avatar
+          FROM momo.board_issue issue
+          LEFT JOIN (
+            SELECT COUNT(*) AS 'reply_count', issue_idx
+              FROM momo.board_issue_reply
+             WHERE reply_status = 0
+             GROUP BY issue_idx
+        ) reply USING (issue_idx)
+          JOIN momo.user U ON (issue_user_idx = user_idx)
+         WHERE issue_status = 0
+           AND issue_user_idx = #{mb_idx}
+         GROUP BY issue.issue_idx
+         ORDER BY issue_idx DESC
+        ]]>
+        <if test='pageNo != null and pageNo != ""'>
+            LIMIT #{start_idx}, #{page_size}
+        </if>
+    </select>
+
+    <insert id="myRequestReloadEquip">
+        <![CDATA[
+        INSERT INTO momo.construction_equipment (construction_type, construction_title, construction_location,
+                                                 construction_location_detail, construction_img, construction_divide_first,
+                                                 construction_divide_second, construction_period_start, construction_period_end,
+                                                 construction_status, construction_user_idx, construction_user_phone,
+                                                 construction_etc, timestamp_edit, timestamp_create)
+        SELECT construction_type, construction_title, construction_location, construction_location_detail,
+               construction_img, construction_divide_first, construction_divide_second, construction_period_start,
+               construction_period_end, construction_status, construction_user_idx, construction_user_phone,
+               construction_etc, timestamp_edit, timestamp_create
+          FROM momo.construction_equipment
+         WHERE construction_user_idx = #{mb_idx}
+           AND construction_idx = #{idx}
+        ]]>
+        <selectKey resultType="int" order="AFTER" keyProperty="construction_idx">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <insert id="myRequestReloadWork">
+        <![CDATA[
+        INSERT INTO momo.work (site_idx, work_type, work_constructor, work_title, work_image, work_divide_first,
+                               work_divide_second, work_rest, work_status, work_location, work_period_start,
+                               work_period_end, work_user_idx, work_user_phone, work_payment, work_etc,
+                               view_count, timestamp_edit, timestamp_create)
+        SELECT site_idx, work_type, work_constructor, work_title, work_image, work_divide_first,
+               work_divide_second, work_rest, work_status, work_location, work_period_start,
+               work_period_end, work_user_idx, work_user_phone, work_payment, work_etc,
+               0 as "view_count", timestamp_edit, timestamp_create
+          FROM momo.work
+         WHERE work_idx = #{idx}
+           AND work_user_idx = #{mb_idx}
+        ]]>
+    </insert>
+
+    <insert id="myRequestReloadFiles">
+        <![CDATA[
+            INSERT INTO momo.files (file_post_type, file_post_idx, file_type, file_path)
+            SELECT file_post_type, #{construction_idx} AS 'file_post_idx', file_type, file_path
+            FROM momo.files
+            WHERE file_post_type = 1
+              AND file_post_idx = #{idx}
+        ]]>
+    </insert>
+
+
+    <select id="selectAcceptanceList" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT W.*
+        FROM momo.work_history WH
+        JOIN momo.work W USING (work_idx)
+        WHERE WH.user_idx = #{mb_idx}
+        AND WH.work_history_status != 3
+        AND WH.work_acceptance = 0
+        ORDER BY work_history_idx DESC
+        <if test='pageNo != null and pageNo != ""'>
+            LIMIT #{start_idx}, #{page_size}
+        </if>
+    </select>
+
+
+</mapper>

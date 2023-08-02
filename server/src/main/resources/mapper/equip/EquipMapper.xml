@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.dk.sample.api.app.equip.mapper.EquipDAO">
+
+    <select id="selectEquipCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT count(*) AS "cnt"
+        FROM momo.construction_equipment
+        WHERE 1=1
+        <if test='category != null and category != "all"'>
+            <![CDATA[
+                AND construction_divide_first = #{category}
+            ]]>
+        </if>
+        <if test='subCategory != null and subCategory != "all"'>
+            <![CDATA[
+                AND construction_location LIKE CONCAT('%', #{subCategory}, '%')
+            ]]>
+        </if>
+        AND construction_status IN (0, 2)
+    </select>
+
+    <select id="selectEquipList" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT E.*, (
+                SELECT L.like_status
+                FROM momo.like_list L
+                WHERE L.like_user_idx = #{mb_idx}
+                AND L.like_type = 1
+                AND L.like_board_num = E.construction_idx
+            ) AS like_status, U.user_name
+        FROM momo.construction_equipment E
+        JOIN momo.user U ON (E.construction_user_idx = U.user_idx)
+        WHERE 1=1
+        <if test='category != null and category != "all"'>
+            <![CDATA[
+                AND construction_divide_first = #{category}
+            ]]>
+        </if>
+        <if test='subCategory != null and subCategory != "all"'>
+            <![CDATA[
+                AND construction_location LIKE CONCAT('%', #{subCategory}, '%')
+            ]]>
+        </if>
+        AND construction_status IN (0, 2)
+        ORDER BY construction_idx DESC
+        <if test='pageNo != null and pageNo != ""'>
+            LIMIT #{start_idx}, #{page_size}
+        </if>
+    </select>
+
+    <select id="getEquipCount" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT E.construction_divide_first AS "text", count(*) AS "cnt"
+          FROM momo.construction_equipment E
+         WHERE construction_status IN (0, 2)
+         GROUP BY construction_divide_first
+         ORDER BY construction_divide_first ASC
+    </select>
+
+    <select id="getAreaCount" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT E.construction_location AS "text", count(*) AS "cnt"
+          FROM momo.construction_equipment E
+         WHERE construction_status IN (0, 2)
+         GROUP BY construction_location
+         ORDER BY construction_location ASC
+    </select>
+
+    <select id="selectEquipFilePaths" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT F.*
+          FROM momo.files F
+         WHERE file_post_type = 1
+           AND file_post_idx = #{idx}
+         ORDER BY file_idx ASC
+    </select>
+
+    <select id="selectEquipDetail" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT e.*, u.user_name
+          FROM momo.construction_equipment e
+          JOIN momo.user u on (e.construction_user_idx = u.user_idx)
+         WHERE construction_idx = #{idx}
+    </select>
+
+    <insert id="insertEquipRental" useGeneratedKeys="true" keyColumn="construction_idx">
+        INSERT INTO momo.construction_equipment(construction_idx, construction_type, construction_title, construction_location,
+                                                construction_location_detail, construction_img,
+                                                construction_divide_first, construction_divide_second,
+                                                construction_period_start, construction_period_end, construction_status,
+                                                construction_user_idx,
+                                                construction_user_phone, construction_etc, timestamp_edit,
+                                                timestamp_create)
+        VALUES (DEFAULT, 0, #{rentalDTO.title}, #{rentalDTO.location}, #{rentalDTO.locationDetail}, #{constructionImage},
+                #{rentalDTO.divideFirst}, #{rentalDTO.divideSecond}, NULL, NULL, 0,
+                #{mb_idx}, #{rentalDTO.phone}, #{rentalDTO.etc}, now(), now())
+        <selectKey resultType="int" order="AFTER" keyProperty="construction_idx">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <insert id="insertFilePaths">
+        INSERT INTO momo.files(file_post_type, file_post_idx, file_type, file_path) VALUES
+        <foreach collection="fileList" item="item" separator=" , ">
+            (#{postType}, #{equipIdx}, #{item.fileType}, #{item.path})
+        </foreach>
+    </insert>
+
+    <insert id="insertEquipLease">
+        INSERT INTO momo.construction_equipment(construction_type, construction_title, construction_location,
+                                                construction_location_detail, construction_divide_first,
+                                                construction_divide_second,
+                                                construction_period_start, construction_period_end, construction_status,
+                                                construction_user_idx,
+                                                construction_user_phone, construction_etc, timestamp_edit,
+                                                timestamp_create)
+        VALUES (1, #{leaseDTO.title}, #{leaseDTO.location}, #{leaseDTO.locationDetail},
+                #{leaseDTO.divideFirst}, #{leaseDTO.divideSecond}, NULL, NULL, 0,
+                #{mb_idx}, #{leaseDTO.phone}, #{rentalDTO.etc}, now(), now())
+    </insert>
+    <insert id="insertEquipRegister">
+        insert into momo.equipment_owner(owner_idx, owner_name, owner_phone, owner_career, owner_address, owner_image,
+                                         owner_category, timestamp_edit, timestamp_create)
+        values (Default, #{owner_name}, #{owner_phone}, #{owner_career}, #{owner_address}, #{owner_image},
+                #{owner_category}, now(), now())
+    </insert>
+
+    <select id="selectEquipOwnerCnt" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT count(*) AS "cnt"
+        FROM momo.equipment_owner
+        WHERE owner_idx = #{mb_idx}
+    </select>
+
+    <select id="selectEquipOwnerImage" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        SELECT owner_image
+        FROM momo.equipment_owner
+        WHERE owner_idx = #{mb_idx}
+    </select>
+
+    <update id="inertEquip">
+        UPDATE momo.construction_equipment
+        SET construction_status = 2
+        WHERE construction_idx = #{equipIdx}
+    </update>
+
+
+    <insert id="insertEquipHistory">
+        INSERT INTO momo.equipment_history(construction_idx, construction_type, user_idx, timestamp_edit, timestamp_create)
+        VALUES (#{equipIdx}, 0, #{mb_idx}, now(), now())
+    </insert>
+
+    <insert id="insertEquipFiles">
+        <![CDATA[
+            INSERT INTO momo.files (file_post_type, file_post_idx, file_type, file_path)
+            SELECT file_post_type, #{construction_idx} AS 'file_post_idx', file_type, file_path
+            FROM momo.files
+            WHERE file_post_type = 1
+              AND file_post_idx = #{rentalDTO.idx}
+        ]]>
+    </insert>
+
+    <select id="checkChatroom" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT COUNT(*) as "cnt"
+        FROM momo.chatroom
+        WHERE chatroom_user_idx_1 = #{mb_idx}
+            AND chatroom_user_idx_2 = #{userIdx}
+           OR chatroom_user_idx_1 = #{userIdx}
+            AND chatroom_user_idx_2 = #{mb_idx}
+        ]]>
+    </select>
+
+    <select id="getChatroom" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT chatroom_idx
+        FROM momo.chatroom
+        WHERE chatroom_user_idx_1 = #{mb_idx}
+            AND chatroom_user_idx_2 = #{userIdx}
+           OR chatroom_user_idx_1 = #{userIdx}
+            AND chatroom_user_idx_2 = #{mb_idx}
+        ]]>
+    </select>
+
+    <insert id="insertChatroom">
+        <![CDATA[
+            INSERT INTO momo.chatroom(chatroom_user_idx_1, chatroom_user_idx_2, chatroom_description)
+            VALUES(#{mb_idx}, #{userIdx}, NULL)
+        ]]>
+        <selectKey resultType="int" order="AFTER" keyProperty="chatroom_idx">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+</mapper>

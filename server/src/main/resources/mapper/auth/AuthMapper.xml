@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.dk.sample.api.app.auth.mapper.AuthDAO">
+
+    <select id="checkUserExist" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT count(*) AS "cnt"
+        FROM momo.user
+        WHERE user_phone = #{phone}
+          AND user_status = 0
+        ]]>
+    </select>
+
+    <select id="getInfoByPhone" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT *
+        FROM momo.user
+        WHERE user_phone = #{phone_number}
+          AND user_status = 0
+        ]]>
+    </select>
+
+    <select id="selectValidateNickName" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        select count(*) AS "nickname"
+        from momo.user
+        where nickName = #{nickname}
+    </select>
+    <select id="getVersion" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT *
+        FROM momo.version
+        ORDER BY version DESC
+        LIMIT 0, 1
+        ]]>
+    </select>
+
+    <update id="updateVersion">
+        <![CDATA[
+        UPDATE momo.version
+        SET version = #{version}
+        ]]>
+    </update>
+
+    <select id="selectMember" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT user_idx,
+               user_email,
+               user_name,
+               user_phone,
+               user_location,
+               user_type,
+               user_status,
+               token_access,
+               token_refresh,
+               token_fcm,
+               code_sms_cert,
+               code_blockchain,
+               timestamp_edit,
+               timestamp_create
+        FROM momo.user
+        WHERE user_phone = #{phone}
+          AND user_status = 0
+        ]]>
+    </select>
+
+    <select id="checkMember" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT user_idx,
+               user_email,
+               user_name,
+               user_phone,
+               user_location,
+               user_type,
+               user_status,
+               token_access,
+               token_refresh,
+               token_fcm,
+               code_sms_cert,
+               code_blockchain,
+               timestamp_edit,
+               timestamp_create
+        FROM momo.user
+        WHERE user_idx = #{mb_idx}
+          AND user_status = 0
+        ]]>
+    </select>
+
+    <select id="compareCode" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT *
+        FROM momo.phone_authentication
+        WHERE phone_number = #{phone}
+          AND idx = (SELECT idx
+                     FROM (SELECT MAX(idx) AS "idx"
+                           FROM momo.phone_authentication
+                           WHERE phone_number = #{phone}) a)
+        ]]>
+    </select>
+
+    <update id="updateMember">
+        <![CDATA[
+        UPDATE momo.user
+        SET token_access   = #{token},
+            token_fcm      = #{fcm_token},
+            token_refresh  = #{refresh},
+            timestamp_edit = now()
+        WHERE user_phone = #{user_phone}
+          AND user_status = 0
+        ]]>
+    </update>
+
+    <update id="updateMemberWithBlockchain">
+        <![CDATA[
+        UPDATE momo.user
+        SET token_access    = #{token},
+            code_blockchain = #{blockchain},
+            timestamp_edit  = now()
+        WHERE user_phone = #{phone}
+          AND user_status = 0
+        ]]>
+    </update>
+
+    <insert id="insertWallet">
+        <![CDATA[
+        INSERT INTO momo.blockchain_info
+        VALUES (DEFAULT, #{blockchain}, #{user_idx})
+        ]]>
+    </insert>
+
+    <insert id="enrollUser" useGeneratedKeys="true" keyColumn="user_idx">
+        <![CDATA[
+        INSERT INTO momo.user(user_idx, user_phone, user_location, push_yn, user_type, code_blockchain, token_fcm, user_name, NickName, timestamp_edit, timestamp_create)
+        VALUES(DEFAULT, #{phone}, #{location}, #{check}, #{user_type}, #{blockchain}, #{fcm_token}, #{name}, #{nickname}, now(), now())
+        ]]>
+        <selectKey resultType="int" order="AFTER" keyProperty="user_idx">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <select id="getNicknameCount" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+            SELECT count(*) AS "cnt"
+              FROM momo.user
+             WHERE NickName = #{nickname}
+        ]]>
+    </select>
+
+    <update id="insertPhoto">
+
+        update momo.user
+        set
+--             NickName=#{nickname},
+            user_image = #{user_image},
+--             user_name=#{user_name},
+            avatar = #{randNum}
+        where user_idx = #{mb_idx}
+
+    </update>
+    <insert id="addSignUp">
+        insert into momo.equipment_owner(owner_idx, owner_name, owner_phone, equip_spec, owner_image, owner_category,
+                                         timestamp_edit, timestamp_create)
+        values (#{mb_idx}, #{owner_name}, #{owner_phone}, #{equip_spec}, #{owner_image}, #{owner_category}, now(),
+                now())
+    </insert>
+    <insert id="insertLabor">
+        insert into momo.labor(labor_idx, labor_name, labor_phone, labor_simple_explain, labor_description,
+                               labor_career, labor_address, labor_image, timestamp_edit, timestamp_create)
+        values (#{mb_idx}, #{owner_name}, #{owner_phone}, #{equipname}, #{owner_category}, #{owner_career},
+                #{owner_address}, #{owner_image}, now(), now())
+    </insert>
+    <update id="insertNickName">
+
+        update user
+        set NickName = #{nickname}
+        where user_idx = #{mb_idx}
+
+    </update>
+    <select id="increaseAuthCount" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        UPDATE momo.phone_authentication
+        SET count          = count + 1,
+            timestamp_edit = now()
+        WHERE phone_number = #{phone}
+          AND idx = (SELECT idx
+                     FROM (SELECT MAX(idx) AS "idx"
+                           FROM momo.phone_authentication
+                           WHERE phone_number = #{phone}) a)
+        ]]>
+    </select>
+
+    <insert id="insertPhoneAuthentication">
+        <![CDATA[
+        INSERT INTO momo.phone_authentication(number, count, phone_number, timestamp_create)
+        VALUES (#{code}, 0, #{phone}, now())
+        ]]>
+    </insert>
+
+    <select id="dbValidateToken" resultType="kr.co.dk.sample.api.common.util.LowerKeyMap">
+        <![CDATA[
+        SELECT mb_idx,
+               token_type,
+               agent_type,
+               token,
+               use_yn
+        FROM mb_token
+        WHERE mb_idx = #{mb_idx}
+          AND use_yn = 'Y'
+          AND token_type = #{token_type}
+          AND agent_type = #{agent_type}
+          AND reg_date BETWEEN DATE_ADD(NOW(), INTERVAL - #{expiration_in_minute} MINUTE) AND NOW()
+          AND token = #{token}
+        ]]>
+    </select>
+
+
+</mapper>
